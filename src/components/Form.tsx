@@ -74,7 +74,7 @@ const Form = () => {
 	return (
 		<form
 			onSubmit={handleSubmit(handleFormSubmit)}
-			className="max-h-[300px] bg-[#1a1a1a] p-6 rounded-xl shadow-lg flex flex-col gap-6"
+			className="max-h-[400px] bg-[#1a1a1a] p-6 rounded-xl shadow-lg flex flex-col justify-evenly gap-6"
 		>
 			{/* Descripción */}
 			<div className="space-y-6 flex flex-col">

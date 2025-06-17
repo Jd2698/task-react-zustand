@@ -1,3 +1,8 @@
+## 🚀 Netlify
+
+> [ https://jd2698-tasks.netlify.app/](https://tasks-in-react-with-zustand.netlify.app/)
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

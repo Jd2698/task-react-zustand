@@ -7,8 +7,8 @@ export const filterAndSortProducts = (
 	let result = products
 
 	if (filters?.description) {
-		const desc = filters.description.toLowerCase()
-		result = result.filter(p => p.description.toLowerCase().includes(desc))
+		const description = filters.description.toLowerCase()
+		result = result.filter(p => p.description.toLowerCase().includes(description))
 	}
 
 	return result.sort((a, b) => a.description.localeCompare(b.description))

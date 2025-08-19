@@ -1,98 +1,108 @@
-import { create } from 'zustand'
-import { v4 as uuidv4 } from 'uuid'
-import { persist } from 'zustand/middleware'
-import { filterAndSortProducts } from '../utils/product.utils'
+import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
+import { persist } from "zustand/middleware";
+import { filterAndSortProducts } from "../utils/product.utils";
 
 export interface ICreateProduct {
-	description: string
-	completed: boolean
+  description: string;
+  completed: boolean;
 }
 
 export interface IProduct extends ICreateProduct {
-	id: string
+  id: string;
 }
 
 interface ProductsState {
-	products: IProduct[]
-	getProducts: (
-		offset: number,
-		limit: number,
-		filters?: { description?: string }
-	) => { data: IProduct[]; totalRecords: number }
-	selectedProduct: IProduct | undefined
-	addProduct: (product: ICreateProduct) => void
-	updateProduct: (product: IProduct) => void
-	setSelectedProduct: (id: string | undefined) => void
-	removeProduct: (id: string) => void
-	init: () => void
+  products: IProduct[];
+  isFiltered: boolean;
+  setIsFiltered: (filter: boolean) => void;
+  filteredProducts: IProduct[];
+  addFilter: (filters?: { description?: string }) => void;
+  selectedProduct: IProduct | undefined;
+  addProduct: (product: ICreateProduct) => void;
+  updateProduct: (product: IProduct) => void;
+  setSelectedProduct: (id: string | undefined) => void;
+  removeProduct: (id: string) => void;
+  setOrderProducts: (products: IProduct[]) => void;
+  init: () => void;
 }
 
 export const useProductStore = create<ProductsState>()(
-	persist(
-		(set, get) => ({
-			products: [],
-			selectedProduct: undefined,
+  persist(
+    (set, get) => ({
+      products: [],
+      filteredProducts: [],
+      isFiltered: false,
+      selectedProduct: undefined,
 
-			addProduct: ({ description, completed }) => {
-				const data: IProduct = {
-					id: uuidv4(),
-					description,
-					completed
-				}
+      setOrderProducts: (products: IProduct[]) => {
+        set(() => ({ products: [...products] }));
+      },
 
-				set(state => ({ products: [...state.products, data] }))
-			},
+      setIsFiltered: (filter: boolean) => {
+        set(() => ({ isFiltered: filter }));
+      },
 
-			getProducts: (
-				offset: number,
-				limit: number,
-				filters?: {
-					description?: string
-				}
-			) => {
-				const all = get().products
+      addFilter: (filters?: { description?: string }) => {
+        const allProducts = get().products;
 
-				const filtered = filterAndSortProducts(all, filters)
+        const filtered = filterAndSortProducts(allProducts, filters);
 
-				return {
-					data: filtered.slice(offset, offset + limit),
-					totalRecords: filtered.length
-				}
-			},
+        set(() => ({ filteredProducts: filtered, isFiltered: true }));
+      },
 
-			setSelectedProduct: (id: string | undefined) => {
-				const { products } = get()
-				const selectedProduct = id ? products.find(p => p.id === id) : undefined
+      addProduct: ({ description, completed }) => {
+        const data: IProduct = {
+          id: uuidv4(),
+          description,
+          completed,
+        };
 
-				set({ selectedProduct })
-			},
+        set((state) => ({ products: [...state.products, data] }));
+      },
 
-			updateProduct: (product: IProduct) =>
-				set(state => ({
-					products: state.products.map(p =>
-						product.id === p.id ? { ...p, ...product } : p
-					)
-				})),
+      setSelectedProduct: (id: string | undefined) => {
+        const { products } = get();
+        const selectedProduct = id
+          ? products.find((p) => p.id === id)
+          : undefined;
 
-			removeProduct: (id: string) =>
-				set(state => ({
-					products: state.products.filter(p => p.id != id)
-				})),
+        set({ selectedProduct });
+      },
 
-			init: () => {
-				const { products } = get()
+      updateProduct: (product: IProduct) =>
+        set((state) => ({
+          products: state.products.map((p) =>
+            product.id === p.id ? { ...p, ...product } : p
+          ),
+        })),
 
-				if (products.length === 0) {
-					const defaultProduct: IProduct = {
-						id: uuidv4(),
-						description: 'Producto inicial',
-						completed: false
-					}
+      removeProduct: (id: string) =>
+        set((state) => ({
+          products: state.products.filter((p) => p.id != id),
+        })),
 
-					set({ products: [defaultProduct] })
-				}
-			}
-		}),
-		{ name: 'products-storage' }
-	)
-)
+      init: () => {
+        const { products } = get();
+
+        if (products.length === 0) {
+          const defaultProducts: IProduct[] = [
+            {
+              id: uuidv4(),
+              description: "example",
+              completed: false,
+            },
+            {
+              id: uuidv4(),
+              description: "example2",
+              completed: true,
+            },
+          ];
+
+          set({ products: defaultProducts });
+        }
+      },
+    }),
+    { name: "products-storage" }
+  )
+);
